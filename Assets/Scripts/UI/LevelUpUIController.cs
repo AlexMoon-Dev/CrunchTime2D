@@ -18,6 +18,9 @@ public class LevelUpUIController : MonoBehaviour
     [Header("1P mode — parent that groups all P2 perk UI")]
     public GameObject p2PerkColumn;
 
+    [Header("1P scale — how much bigger P1 cards get in single-player")]
+    public float singlePlayerScale = 1.5f;
+
     [Header("Prefab")]
     public PerkCardUI perkCardPrefab;
 
@@ -56,6 +59,13 @@ public class LevelUpUIController : MonoBehaviour
         {
             if (p2CardContainer != null) p2CardContainer.gameObject.SetActive(!singlePlayer);
             if (p2StatusText    != null) p2StatusText.gameObject.SetActive(!singlePlayer);
+        }
+
+        // Scale up the P1 card container when P2 is hidden so it fills the space
+        if (p1CardContainer != null)
+        {
+            float s = singlePlayer ? singlePlayerScale : 1f;
+            p1CardContainer.localScale = new Vector3(s, s, 1f);
         }
 
         if (!singlePlayer)

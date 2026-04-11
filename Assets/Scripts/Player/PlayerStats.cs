@@ -67,7 +67,15 @@ public class PlayerStats : MonoBehaviour
         }
 
         if (_currentHealth <= 0f)
+        {
+            GetComponent<PlayerController>()?.TriggerDieAnim();
             OnDeath?.Invoke();
+        }
+        else
+        {
+            GetComponent<PlayerController>()?.TriggerHurtAnim();
+            GetComponent<PlayerVisualFeedback>()?.OnHit();
+        }
     }
 
     public void Heal(float amount)

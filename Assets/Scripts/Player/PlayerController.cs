@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D  _rb;
     private PlayerStats  _stats;
     private PlayerCombat _combat;
+    private Animator     _animator;
 
     private Vector2 _moveInput;
     private bool    _jumpPressed;
@@ -56,9 +57,10 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        _rb      = GetComponent<Rigidbody2D>();
-        _stats   = GetComponent<PlayerStats>();
-        _combat  = GetComponent<PlayerCombat>();
+        _rb       = GetComponent<Rigidbody2D>();
+        _stats    = GetComponent<PlayerStats>();
+        _combat   = GetComponent<PlayerCombat>();
+        _animator = GetComponent<Animator>();
         _mainCamera = Camera.main;
     }
 
@@ -82,6 +84,7 @@ public class PlayerController : MonoBehaviour
         HandleDashCooldown();
         UpdateAim();
         UpdateFacing();
+        UpdateAnimator();
     }
 
     private void FixedUpdate()
@@ -261,6 +264,20 @@ public class PlayerController : MonoBehaviour
     {
         _isKeyboardMouse = pi.currentControlScheme == "KeyboardMouse";
     }
+
+    // ── Animator ─────────────────────────────────────────────────────────────
+
+    private void UpdateAnimator()
+    {
+        if (_animator == null) return;
+        _animator.SetFloat("Speed",         Mathf.Abs(_moveInput.x));
+        _animator.SetFloat("VerticalSpeed", _rb.linearVelocity.y);
+        _animator.SetBool ("IsGrounded",    _isGrounded);
+    }
+
+    public void TriggerAttackAnim() => _animator?.SetTrigger("AttackTrigger");
+    public void TriggerHurtAnim()   => _animator?.SetTrigger("HurtTrigger");
+    public void TriggerDieAnim()    => _animator?.SetTrigger("DieTrigger");
 
     // ── Public helpers ────────────────────────────────────────────────────────
 

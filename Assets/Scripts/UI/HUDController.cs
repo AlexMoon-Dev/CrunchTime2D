@@ -19,6 +19,7 @@ public class HUDController : MonoBehaviour
         WaveManager.OnWaveStarted        += OnWaveStarted;
         PlayerRespawnHandler.OnRespawnTimerStarted += OnRespawnStarted;
         PlayerRespawnHandler.OnPlayerRespawned     += OnPlayerRespawned;
+        GameManager.OnGameStateChanged             += OnStateChanged;
     }
 
     private void OnDisable()
@@ -26,6 +27,7 @@ public class HUDController : MonoBehaviour
         WaveManager.OnWaveStarted        -= OnWaveStarted;
         PlayerRespawnHandler.OnRespawnTimerStarted -= OnRespawnStarted;
         PlayerRespawnHandler.OnPlayerRespawned     -= OnPlayerRespawned;
+        GameManager.OnGameStateChanged             -= OnStateChanged;
     }
 
     private void Start()
@@ -37,6 +39,18 @@ public class HUDController : MonoBehaviour
             var hud = s.playerIndex == 0 ? player1HUD : player2HUD;
             hud?.Bind(s, s.GetComponent<PlayerLeveling>());
         }
+    }
+
+    private void OnStateChanged(GameState state)
+    {
+        // ClassSelection fires right after Apply() — PlayerCount is reliable here.
+        if (state != GameState.ClassSelection) return;
+
+        bool singlePlayer = GameSetupManager.Instance != null
+            && GameSetupManager.Instance.PlayerCount == 1;
+
+        if (player2HUD != null)
+            player2HUD.gameObject.SetActive(!singlePlayer);
     }
 
     private void Update()
