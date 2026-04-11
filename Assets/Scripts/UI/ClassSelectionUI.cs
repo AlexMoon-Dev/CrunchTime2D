@@ -51,9 +51,6 @@ public class ClassSelectionUI : MonoBehaviour
         GameManager.OnGameStateChanged -= OnStateChanged;
     }
 
-    [Header("1P scale — how much bigger P1 cards get in single-player")]
-    public float singlePlayerScale = 1.5f;
-
     private void OnStateChanged(GameState state)
     {
         if (state == GameState.ClassSelection)
@@ -69,10 +66,6 @@ public class ClassSelectionUI : MonoBehaviour
                 foreach (var c in p2Cards) c?.gameObject.SetActive(!singlePlayer);
                 p2Status?.gameObject.SetActive(!singlePlayer);
             }
-
-            // Scale up the P1 content when P2 is hidden so it fills the space
-            float s = singlePlayer ? singlePlayerScale : 1f;
-            transform.localScale = new Vector3(s, s, 1f);
         }
         else if (state == GameState.Wave)
         {
