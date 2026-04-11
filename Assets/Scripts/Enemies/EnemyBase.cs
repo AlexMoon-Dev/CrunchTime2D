@@ -22,6 +22,8 @@ public class EnemyBase : MonoBehaviour
     protected Transform   _target;
     protected bool        _stunned;
 
+    private float _contactDamageCooldown;
+
     public virtual void Awake()
     {
         _rb             = GetComponent<Rigidbody2D>();
@@ -36,6 +38,7 @@ public class EnemyBase : MonoBehaviour
     protected virtual void Update()
     {
         if (IsDead || _stunned) return;
+        if (_contactDamageCooldown > 0f) _contactDamageCooldown -= Time.deltaTime;
         _target = FindClosestPlayer();
         Behave();
     }
@@ -122,7 +125,12 @@ public class EnemyBase : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D col)
     {
+        if (_contactDamageCooldown > 0f) return;
         var ps = col.gameObject.GetComponent<PlayerStats>();
-        if (ps != null && !IsDead) DamagePlayer(ps);
+        if (ps != null && !IsDead)
+        {
+            DamagePlayer(ps);
+            _contactDamageCooldown = 0.75f;
+        }
     }
 }

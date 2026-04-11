@@ -52,8 +52,13 @@ public class ClassManager : MonoBehaviour
 
     private void CheckBothConfirmed()
     {
-        if (!_confirmed[0] || !_confirmed[1]) return;
-        // Apply stats to each player and transition to wave
+        bool singlePlayer = GameSetupManager.Instance != null
+            && GameSetupManager.Instance.PlayerCount == 1;
+
+        bool p2Done = singlePlayer || _confirmed[1];
+        if (!_confirmed[0] || !p2Done) return;
+
+        // Apply stats to each active player and transition to wave
         var players = FindObjectsByType<PlayerStats>(FindObjectsSortMode.None);
         foreach (var p in players)
         {

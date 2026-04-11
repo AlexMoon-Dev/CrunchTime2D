@@ -16,6 +16,9 @@ public class ClassSelectionUI : MonoBehaviour
     public TextMeshProUGUI p1Status;
     public TextMeshProUGUI p2Status;
 
+    [Header("1P mode — assign the parent that groups all P2 UI")]
+    public GameObject p2Column;   // hides entire P2 side when playing solo
+
     [Header("Class Definitions (assign in inspector)")]
     public ClassDefinitionSO tankDef;
     public ClassDefinitionSO fighterDef;
@@ -30,6 +33,20 @@ public class ClassSelectionUI : MonoBehaviour
             if (defs[i] == null) continue;
             if (i < p1Cards.Length) p1Cards[i]?.Setup(defs[i], (d) => OnPlayerChoose(0, d));
             if (i < p2Cards.Length) p2Cards[i]?.Setup(defs[i], (d) => OnPlayerChoose(1, d));
+        }
+
+        // In single-player mode hide the entire P2 column
+        bool singlePlayer = GameSetupManager.Instance != null
+            && GameSetupManager.Instance.PlayerCount == 1;
+        if (singlePlayer)
+        {
+            if (p2Column != null)
+                p2Column.SetActive(false);
+            else
+            {
+                foreach (var c in p2Cards) c?.gameObject.SetActive(false);
+                p2Status?.gameObject.SetActive(false);
+            }
         }
 
         ClassManager.OnClassLocked += OnClassLocked;

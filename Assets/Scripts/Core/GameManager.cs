@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum GameState { ClassSelection, Wave, LevelUp, Paused, GameOver }
+public enum GameState { PlayerCountSelection, ClassSelection, Wave, LevelUp, Paused, GameOver }
 
 /// <summary>
 /// Singleton. Owns game-state transitions and is the single source of truth
@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        SetState(GameState.ClassSelection);
+        SetState(GameState.PlayerCountSelection);
     }
 
     public void SetState(GameState newState)

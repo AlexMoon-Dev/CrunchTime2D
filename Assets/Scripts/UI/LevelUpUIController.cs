@@ -10,10 +10,13 @@ public class LevelUpUIController : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject panel;
-    public Transform  p1CardContainer;   // 3 PerkCardUI children
+    public Transform  p1CardContainer;
     public Transform  p2CardContainer;
     public TextMeshProUGUI p1StatusText;
     public TextMeshProUGUI p2StatusText;
+
+    [Header("1P mode — parent that groups all P2 perk UI")]
+    public GameObject p2PerkColumn;
 
     [Header("Prefab")]
     public PerkCardUI perkCardPrefab;
@@ -24,17 +27,42 @@ public class LevelUpUIController : MonoBehaviour
     // Class selection mode — cards are ClassDefinitionSOs dressed as PerkSOs
     private bool _isClassSelection = false;
 
+    private void OnEnable()  => GameManager.OnGameStateChanged += OnStateChanged;
+    private void OnDisable() => GameManager.OnGameStateChanged -= OnStateChanged;
+
+    private void OnStateChanged(GameState state)
+    {
+        if (state == GameState.Wave) Hide();
+    }
+
     public void Show(List<PerkSO> p1Offerings, List<PerkSO> p2Offerings)
     {
         panel?.SetActive(true);
         _p1Confirmed = false;
         _p2Confirmed = false;
 
-        PopulateCards(p1CardContainer, p1Offerings, 0);
-        PopulateCards(p2CardContainer, p2Offerings, 1);
+        bool singlePlayer = GameSetupManager.Instance != null
+            && GameSetupManager.Instance.PlayerCount == 1;
 
+        PopulateCards(p1CardContainer, p1Offerings, 0);
         p1StatusText?.SetText("Choose a perk");
-        p2StatusText?.SetText("Choose a perk");
+
+        // Show or hide the P2 perk column based on player count
+        if (p2PerkColumn != null)
+        {
+            p2PerkColumn.SetActive(!singlePlayer);
+        }
+        else
+        {
+            if (p2CardContainer != null) p2CardContainer.gameObject.SetActive(!singlePlayer);
+            if (p2StatusText    != null) p2StatusText.gameObject.SetActive(!singlePlayer);
+        }
+
+        if (!singlePlayer)
+        {
+            PopulateCards(p2CardContainer, p2Offerings, 1);
+            p2StatusText?.SetText("Choose a perk");
+        }
     }
 
     public void Hide() => panel?.SetActive(false);

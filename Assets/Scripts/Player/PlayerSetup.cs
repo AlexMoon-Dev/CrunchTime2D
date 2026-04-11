@@ -29,14 +29,15 @@ public class PlayerSetup : MonoBehaviour
         if (sr != null) sr.color = playerColor;
     }
 
-    private void Start()
+    /// <summary>
+    /// Called by GameSetupManager after the player count / control scheme screen.
+    /// </summary>
+    public void ApplyControlScheme(string scheme)
     {
-        // Force the correct control scheme on startup
         var pi = GetComponent<PlayerInput>();
-        if (playerIndex == 0)
-            pi.SwitchCurrentControlScheme("KeyboardMouse",
-                Keyboard.current, Mouse.current);
-        else if (Gamepad.current != null)
-            pi.SwitchCurrentControlScheme("Gamepad", Gamepad.current);
+        if (scheme == "KeyboardMouse" && Keyboard.current != null)
+            pi.SwitchCurrentControlScheme("KeyboardMouse", Keyboard.current, Mouse.current);
+        else if (scheme == "Gamepad" && Gamepad.all.Count > 0)
+            pi.SwitchCurrentControlScheme("Gamepad", Gamepad.all[0]);
     }
 }
