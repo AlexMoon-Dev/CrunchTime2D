@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 /// <summary>
@@ -48,6 +49,14 @@ public class PlayerCountSelectionUI : MonoBehaviour
         twoPlayersButton.onClick.AddListener(OnTwoPlayers);
         keyboardButton.onClick.AddListener(OnKeyboard);
         controllerButton.onClick.AddListener(OnController);
+
+        // Enable the UI action map — PlayerInput only enables "Player" map by default,
+        // which leaves the UI map disabled and blocks gamepad navigation of buttons.
+        var pi = FindFirstObjectByType<PlayerInput>();
+        pi?.actions.FindActionMap("UI")?.Enable();
+
+        // Give gamepad/keyboard navigation a starting point
+        EventSystem.current?.SetSelectedGameObject(onePlayerButton.gameObject);
     }
 
     private void OnDestroy()
@@ -61,6 +70,7 @@ public class PlayerCountSelectionUI : MonoBehaviour
     {
         countPanel.SetActive(false);
         schemePanel.SetActive(true);
+        EventSystem.current?.SetSelectedGameObject(keyboardButton.gameObject);
     }
 
     private void OnTwoPlayers()

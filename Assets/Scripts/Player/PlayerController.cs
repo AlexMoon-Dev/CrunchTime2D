@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     private bool    _jumpHeld;
 
     private bool  _isGrounded;
+    private int   _groundContactCount;   // collision-based ground detection
     private float _coyoteTimer;
     private int   _jumpsLeft;
 
@@ -96,9 +97,29 @@ public class PlayerController : MonoBehaviour
     private void UpdateGrounded()
     {
         bool wasGrounded = _isGrounded;
-        _isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayers);
+        _isGrounded = _groundContactCount > 0;
         if (_isGrounded && !wasGrounded)
+        {
+            Debug.Log($"[Jump] Landed! jumpsLeft reset to {maxJumps}");
             OnLanded();
+        }
+        else if (!_isGrounded && wasGrounded)
+        {
+            Debug.Log("[Jump] Left ground.");
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        if (((1 << col.gameObject.layer) & groundLayers.value) == 0) return;
+        foreach (var c in col.contacts)
+            if (c.normal.y > 0.5f) { _groundContactCount++; break; }
+    }
+
+    private void OnCollisionExit2D(Collision2D col)
+    {
+        if (((1 << col.gameObject.layer) & groundLayers.value) == 0) return;
+        _groundContactCount = Mathf.Max(0, _groundContactCount - 1);
     }
 
     private void OnLanded()
