@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fde6336840913d84682435db1cba73a4, type: 3}
+  m_Name: Momentum
+  m_EditorClassIdentifier: Assembly-CSharp::MomentumPerk
+  perkName: Momentum
+  description: Consecutive hits on same enemy +5% dmg
+  icon: {fileID: 0}
+  tankWeight: 0
+  fighterWeight: 10
+  rangerWeight: 0
+  isClassPerk: 1
+  stackBonus: 0.05
+  maxStacks: 6

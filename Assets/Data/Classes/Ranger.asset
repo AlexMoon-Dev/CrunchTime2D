@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d4b826f993eb9e429532bef0cfd03b8, type: 3}
+  m_Name: Ranger
+  m_EditorClassIdentifier: Assembly-CSharp::ClassDefinitionSO
+  classType: 3
+  className: Ranger
+  description: Ranged attacker. Projects force from a distance.
+  classIcon: {fileID: 0}
+  bonusMaxHealth: 0
+  bonusArmor: 0
+  bonusAttackDamage: 8
+  bonusMoveSpeed: 0.3
+  bonusAttackSpeed: 0
+  bonusCritChance: 0.05
+  classPerks:
+  - {fileID: 11400000, guid: f44ed55add5faf740933d6d91f46df56, type: 2}
+  - {fileID: 11400000, guid: ac10ab85cc4d5a74e84ab1016d0ae7ea, type: 2}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851082a70a2f0af4faf71c54750ea67f, type: 3}
+  m_Name: GhostStep
+  m_EditorClassIdentifier: Assembly-CSharp::GhostStepPerk
+  perkName: Ghost Step
+  description: Dash leaves damaging trail for 1s
+  icon: {fileID: 0}
+  tankWeight: 2
+  fighterWeight: 5
+  rangerWeight: 9
+  isClassPerk: 0
+  trailDamage: 8
+  trailDuration: 1
+  trailRadius: 0.8
+  trailPrefab: {fileID: 0}

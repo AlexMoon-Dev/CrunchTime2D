@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da350abafa73afe4da9de03d2add82f7, type: 3}
+  m_Name: GroundShaker
+  m_EditorClassIdentifier: Assembly-CSharp::GroundShakerPerk
+  perkName: Ground Shaker
+  description: Heavy attack adds ground shockwave
+  icon: {fileID: 0}
+  tankWeight: 9
+  fighterWeight: 3
+  rangerWeight: 1
+  isClassPerk: 0
+  shockwavePrefab: {fileID: 0}

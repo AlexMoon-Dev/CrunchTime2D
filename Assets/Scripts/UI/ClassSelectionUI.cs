@@ -1,0 +1,63 @@
+using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
+
+/// <summary>
+/// Displayed at game start. Both players pick a class.
+/// When P1 confirms, their class is locked and P2's matching card grays out.
+/// </summary>
+public class ClassSelectionUI : MonoBehaviour
+{
+    [Header("Class Cards per Player")]
+    public ClassCardUI[] p1Cards;   // 3 cards: Tank, Fighter, Ranger
+    public ClassCardUI[] p2Cards;
+
+    [Header("Status")]
+    public TextMeshProUGUI p1Status;
+    public TextMeshProUGUI p2Status;
+
+    [Header("Class Definitions (assign in inspector)")]
+    public ClassDefinitionSO tankDef;
+    public ClassDefinitionSO fighterDef;
+    public ClassDefinitionSO rangerDef;
+
+    private void Start()
+    {
+        var defs = new[] { tankDef, fighterDef, rangerDef };
+
+        for (int i = 0; i < 3 && i < defs.Length; i++)
+        {
+            if (defs[i] == null) continue;
+            if (i < p1Cards.Length) p1Cards[i]?.Setup(defs[i], (d) => OnPlayerChoose(0, d));
+            if (i < p2Cards.Length) p2Cards[i]?.Setup(defs[i], (d) => OnPlayerChoose(1, d));
+        }
+
+        ClassManager.OnClassLocked += OnClassLocked;
+    }
+
+    private void OnDestroy()
+    {
+        ClassManager.OnClassLocked -= OnClassLocked;
+    }
+
+    private void OnPlayerChoose(int playerIndex, ClassDefinitionSO def)
+    {
+        bool ok = ClassManager.Instance?.TryConfirmClass(playerIndex, def.classType) ?? false;
+        if (!ok) return;
+
+        if (playerIndex == 0) p1Status?.SetText($"Chose {def.className}. Waiting...");
+        else                  p2Status?.SetText($"Chose {def.className}. Waiting...");
+    }
+
+    private void OnClassLocked(ClassType ct)
+    {
+        // Gray out matching cards for both players
+        void GrayOut(ClassCardUI[] cards)
+        {
+            foreach (var c in cards)
+                if (c.ClassType == ct) c.SetLocked(true);
+        }
+        GrayOut(p1Cards);
+        GrayOut(p2Cards);
+    }
+}

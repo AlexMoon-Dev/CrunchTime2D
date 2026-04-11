@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e835321dc8987374da5bdb7f1cb3dca8, type: 3}
+  m_Name: Aegis
+  m_EditorClassIdentifier: Assembly-CSharp::AegisPerk
+  perkName: Aegis
+  description: Gain shield = 20% of armor every 10s
+  icon: {fileID: 0}
+  tankWeight: 9
+  fighterWeight: 3
+  rangerWeight: 1
+  isClassPerk: 0
+  shieldPercent: 0.2
+  rechargeTime: 10

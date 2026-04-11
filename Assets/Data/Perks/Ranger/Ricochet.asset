@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c53e2f254e480f41bb60534d5b36f95, type: 3}
+  m_Name: Ricochet
+  m_EditorClassIdentifier: Assembly-CSharp::RicochetPerk
+  perkName: Ricochet
+  description: Basic projectile bounces to 1 enemy
+  icon: {fileID: 0}
+  tankWeight: 1
+  fighterWeight: 3
+  rangerWeight: 9
+  isClassPerk: 0
