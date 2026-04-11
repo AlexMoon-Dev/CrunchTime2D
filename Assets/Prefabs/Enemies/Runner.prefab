@@ -180,7 +180,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunnerEnemy
   maxHealth: 30
-  damage: 5
+  damage: 3
   moveSpeed: 3
   xpValue: 10
   armor: 0

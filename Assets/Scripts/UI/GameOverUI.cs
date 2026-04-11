@@ -7,12 +7,15 @@ public class GameOverUI : MonoBehaviour
     public TextMeshProUGUI waveReachedText;
     public UnityEngine.UI.Button restartButton;
 
-    private void OnEnable()
+    private void Awake()
     {
+        // Subscribe in Awake so the event fires even when this panel is inactive.
+        // OnEnable/OnDisable would unsubscribe when panel.SetActive(false) is called
+        // in Start(), silently breaking the game-over trigger.
         GameManager.OnGameStateChanged += OnStateChanged;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         GameManager.OnGameStateChanged -= OnStateChanged;
     }

@@ -25,7 +25,10 @@ public class WaveManager : MonoBehaviour
     public GameObject bossPrefab;
 
     [Header("Spawn Rate (enemies/sec) base")]
-    public float baseSpawnRate = 0.8f;
+    public float baseSpawnRate = 0.25f;
+
+    [Header("Grace period before first spawn each wave (seconds)")]
+    public float spawnGracePeriod = 4f;
 
     // ── Runtime ───────────────────────────────────────────────────────────────
     public int   CurrentWave       { get; private set; } = 0;
@@ -96,6 +99,7 @@ public class WaveManager : MonoBehaviour
 
     private IEnumerator SpawnLoop()
     {
+        yield return new WaitForSeconds(spawnGracePeriod);
         while (true)
         {
             float interval = 1f / (baseSpawnRate * (1f + CurrentWave * 0.1f));
