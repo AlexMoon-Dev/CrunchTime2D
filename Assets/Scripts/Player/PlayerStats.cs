@@ -10,12 +10,13 @@ public class PlayerStats : MonoBehaviour
     [Header("Base Stats — set these on the prefab")]
     public float maxHealth     = 100f;
     public float armor         = 0f;       // flat damage reduction
-    public float attackDamage  = 10f;
-    public float attackSpeed   = 1f;       // attacks per second multiplier
+    public float attackDamage  = 30f;
+    public float attackSpeed   = 2f;       // attacks per second multiplier
     public float moveSpeed     = 6f;
     public float critChance    = 0.05f;    // 0–1
     public float critMultiplier = 1.5f;
     public float dashCooldown  = 1.5f;     // seconds
+    public float healthRegen   = 2f;       // hp restored per second (passive)
     public int   playerIndex   = 0;        // 0 = P1, 1 = P2
 
     [Header("Runtime (read-only in inspector)")]
@@ -34,6 +35,12 @@ public class PlayerStats : MonoBehaviour
     private void Awake()
     {
         _currentHealth = maxHealth;
+    }
+
+    private void Update()
+    {
+        if (IsDead || _currentHealth >= maxHealth) return;
+        Heal(healthRegen * Time.deltaTime);
     }
 
     // ── Damage ───────────────────────────────────────────────────────────────
@@ -65,7 +72,7 @@ public class PlayerStats : MonoBehaviour
 
     public void Heal(float amount)
     {
-        if (_currentHealth < 0f) return;   // only block if truly below zero, not at 0
+        if (IsDead) return;
         _currentHealth = Mathf.Min(maxHealth, _currentHealth + amount);
         OnHealthChanged?.Invoke(_currentHealth, maxHealth);
     }
@@ -79,6 +86,7 @@ public class PlayerStats : MonoBehaviour
         OnHealthChanged?.Invoke(_currentHealth, maxHealth);
     }
 
+    public void AddHealthRegen(float delta)    => healthRegen   += delta;
     public void AddArmor(float delta)         => armor         += delta;
     public void AddAttackDamage(float delta)  => attackDamage  += delta;
     public void MultiplyAttackDamage(float f) => attackDamage  *= f;

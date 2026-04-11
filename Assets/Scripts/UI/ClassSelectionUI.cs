@@ -35,26 +35,42 @@ public class ClassSelectionUI : MonoBehaviour
             if (i < p2Cards.Length) p2Cards[i]?.Setup(defs[i], (d) => OnPlayerChoose(1, d));
         }
 
-        // In single-player mode hide the entire P2 column
-        bool singlePlayer = GameSetupManager.Instance != null
-            && GameSetupManager.Instance.PlayerCount == 1;
-        if (singlePlayer)
-        {
-            if (p2Column != null)
-                p2Column.SetActive(false);
-            else
-            {
-                foreach (var c in p2Cards) c?.gameObject.SetActive(false);
-                p2Status?.gameObject.SetActive(false);
-            }
-        }
-
         ClassManager.OnClassLocked += OnClassLocked;
+        GameManager.OnGameStateChanged += OnStateChanged;
+
+        // LevelUpPanel starts inactive, so Start() fires after ShowClassSelection()
+        // activates it — meaning SetState(ClassSelection) already fired and was missed.
+        // Apply layout immediately if we're already in that state.
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.ClassSelection)
+            OnStateChanged(GameState.ClassSelection);
     }
 
     private void OnDestroy()
     {
         ClassManager.OnClassLocked -= OnClassLocked;
+        GameManager.OnGameStateChanged -= OnStateChanged;
+    }
+
+    private void OnStateChanged(GameState state)
+    {
+        if (state == GameState.ClassSelection)
+        {
+            // Apply() has been called by now — PlayerCount is correct
+            bool singlePlayer = GameSetupManager.Instance != null
+                && GameSetupManager.Instance.PlayerCount == 1;
+
+            if (p2Column != null)
+                p2Column.SetActive(!singlePlayer);
+            else
+            {
+                foreach (var c in p2Cards) c?.gameObject.SetActive(!singlePlayer);
+                p2Status?.gameObject.SetActive(!singlePlayer);
+            }
+        }
+        else if (state == GameState.Wave)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     private void OnPlayerChoose(int playerIndex, ClassDefinitionSO def)

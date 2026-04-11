@@ -71,6 +71,10 @@ public class EnemyBase : MonoBehaviour
     protected virtual void Die()
     {
         _currentHealth = 0f;
+        // Destroy first — Destroy is deferred to end-of-frame, so XP code below
+        // still runs, but any exception in the event chain can never leave a zombie.
+        Destroy(gameObject);
+
         // Award XP to all living players
         var players = FindObjectsByType<PlayerLeveling>(FindObjectsSortMode.None);
         foreach (var p in players)
@@ -80,7 +84,6 @@ public class EnemyBase : MonoBehaviour
                 p.AddXP(xpValue);
         }
         // TODO: play death VFX
-        Destroy(gameObject);
     }
 
     public void ApplyDifficultyMultiplier(float multiplier)

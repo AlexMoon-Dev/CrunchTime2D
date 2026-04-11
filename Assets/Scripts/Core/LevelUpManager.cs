@@ -39,6 +39,12 @@ public class LevelUpManager : MonoBehaviour
 
     private void HandleLevelUp(PlayerLeveling leveling)
     {
+        if (perkDatabase == null)
+        {
+            Debug.LogError("[LevelUpManager] perkDatabase is not assigned — assign it in the Inspector.", this);
+            return;
+        }
+
         int idx = leveling.GetComponent<PlayerStats>().playerIndex;
         _levelUpPending[idx] = true;
 
