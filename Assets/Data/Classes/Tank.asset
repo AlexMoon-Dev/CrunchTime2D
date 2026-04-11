@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Tough frontliner. High armor and HP, slow melee.
   classIcon: {fileID: 0}
   bonusMaxHealth: 30
-  bonusArmor: 10
+  bonusArmor: 3
   bonusAttackDamage: 2
   bonusMoveSpeed: -0.5
   bonusAttackSpeed: 0

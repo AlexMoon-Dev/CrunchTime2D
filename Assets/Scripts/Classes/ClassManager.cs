@@ -10,8 +10,9 @@ public class ClassManager : MonoBehaviour
     public static ClassManager Instance { get; private set; }
 
     // Indexed by playerIndex (0 / 1)
-    private ClassType[] _selectedClasses = { ClassType.None, ClassType.None };
-    private bool[]      _confirmed        = { false, false };
+    private ClassType[]          _selectedClasses = { ClassType.None, ClassType.None };
+    private ClassDefinitionSO[]  _selectedDefs    = { null, null };
+    private bool[]               _confirmed        = { false, false };
 
     public static event Action<int, ClassType> OnClassConfirmed;  // (playerIndex, class)
     public static event Action<ClassType>      OnClassLocked;     // class is now unavailable
@@ -30,21 +31,21 @@ public class ClassManager : MonoBehaviour
     }
 
     /// <summary>Returns false if the class is already locked by the other player.</summary>
-    public bool TryConfirmClass(int playerIndex, ClassType ct)
+    public bool TryConfirmClass(int playerIndex, ClassDefinitionSO def)
     {
         // Ranger can only be chosen by one player
-        if (ct == ClassType.Ranger && IsClassLocked(ClassType.Ranger))
+        if (def.classType == ClassType.Ranger && IsClassLocked(ClassType.Ranger))
         {
             Debug.LogWarning("[ClassManager] Only one Ranger allowed!");
             return false;
         }
 
-        _selectedClasses[playerIndex] = ct;
+        _selectedClasses[playerIndex] = def.classType;
+        _selectedDefs[playerIndex]    = def;
         _confirmed[playerIndex]       = true;
 
-        OnClassConfirmed?.Invoke(playerIndex, ct);
-        OnClassLocked?.Invoke(ct);
-
+        OnClassConfirmed?.Invoke(playerIndex, def.classType);
+        OnClassLocked?.Invoke(def.classType);
 
         CheckBothConfirmed();
         return true;
@@ -58,13 +59,11 @@ public class ClassManager : MonoBehaviour
         bool p2Done = singlePlayer || _confirmed[1];
         if (!_confirmed[0] || !p2Done) return;
 
-        // Apply stats to each active player and transition to wave
+        // Apply stats directly from the stored SO — no Resources.Load needed
         var players = FindObjectsByType<PlayerStats>(FindObjectsSortMode.None);
         foreach (var p in players)
         {
-            var cls = _selectedClasses[p.playerIndex];
-            var def = Resources.Load<ClassDefinitionSO>($"Classes/{cls}");
-            def?.ApplyBaseStats(p);
+            _selectedDefs[p.playerIndex]?.ApplyBaseStats(p);
         }
         GameManager.Instance?.StartWave();
     }

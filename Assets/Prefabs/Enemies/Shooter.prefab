@@ -189,4 +189,4 @@ MonoBehaviour:
   preferredDistance: 6
   fireRate: 1.5
   projectileSpeed: 6
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 8342249279065625936, guid: 1d3d0bbb499900249a8b0e1bfe7547c6, type: 3}

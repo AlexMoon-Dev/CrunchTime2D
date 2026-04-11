@@ -89,11 +89,9 @@ public class PlayerRespawnHandler : MonoBehaviour
         if (respawnPoint != null)
             transform.position = respawnPoint.position;
 
-        // Restore to 50% health — accessing private field via a public method
+        // Restore to 50% health — use ReviveWithHealth to bypass the IsDead guard
         var stats = GetComponent<PlayerStats>();
-        // Heal to 50% by healing the deficit
-        float target = stats.maxHealth * 0.5f;
-        stats.Heal(target);   // Heal clamps to max; player is at 0, so this gives 50%
+        stats.ReviveWithHealth(stats.maxHealth * 0.5f);
 
         SetPlayerActive(true);
         OnPlayerRespawned?.Invoke(this);

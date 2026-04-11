@@ -75,7 +75,7 @@ public class ClassSelectionUI : MonoBehaviour
 
     private void OnPlayerChoose(int playerIndex, ClassDefinitionSO def)
     {
-        bool ok = ClassManager.Instance?.TryConfirmClass(playerIndex, def.classType) ?? false;
+        bool ok = ClassManager.Instance?.TryConfirmClass(playerIndex, def) ?? false;
         if (!ok) return;
 
         if (playerIndex == 0) p1Status?.SetText($"Chose {def.className}. Waiting...");

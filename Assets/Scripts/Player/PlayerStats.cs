@@ -77,6 +77,16 @@ public class PlayerStats : MonoBehaviour
         OnHealthChanged?.Invoke(_currentHealth, maxHealth);
     }
 
+    /// <summary>
+    /// Revives a dead player directly to the given health amount.
+    /// Unlike Heal(), this bypasses the IsDead guard.
+    /// </summary>
+    public void ReviveWithHealth(float amount)
+    {
+        _currentHealth = Mathf.Clamp(amount, 0.01f, maxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, maxHealth);
+    }
+
     // ── Stat helpers (perks call these) ──────────────────────────────────────
 
     public void AddMaxHealth(float delta)

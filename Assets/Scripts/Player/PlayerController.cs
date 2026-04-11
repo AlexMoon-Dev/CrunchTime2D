@@ -62,6 +62,15 @@ public class PlayerController : MonoBehaviour
         _mainCamera = Camera.main;
     }
 
+    private void Start()
+    {
+        // OnControlsChanged only fires on scheme transitions, not at startup —
+        // read the current scheme directly so keyboard+mouse aim works from the first frame.
+        var pi = GetComponent<PlayerInput>();
+        if (pi != null)
+            _isKeyboardMouse = pi.currentControlScheme == "KeyboardMouse";
+    }
+
     private void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.Wave) return;
