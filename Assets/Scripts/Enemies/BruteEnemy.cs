@@ -34,10 +34,14 @@ public class BruteEnemy : EnemyBase
         else
             _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
 
+        FaceTarget();
+        AnimFloat("Speed", Mathf.Abs(_rb.linearVelocity.x));
+
         _atkTimer -= Time.deltaTime;
         if (_atkTimer <= 0f && dist <= 1.5f)
         {
             _atkTimer = attackCooldown;
+            AnimTrigger("AttackTrigger");
             var ps = _target.GetComponent<PlayerStats>();
             if (ps != null) DamagePlayer(ps);
         }

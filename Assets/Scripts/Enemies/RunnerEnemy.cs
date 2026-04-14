@@ -20,5 +20,8 @@ public class RunnerEnemy : EnemyBase
         if (_target == null) return;
         Vector2 dir = ((Vector2)_target.position - (Vector2)transform.position).normalized;
         _rb.linearVelocity = new Vector2(dir.x * moveSpeed, _rb.linearVelocity.y);
+
+        FaceVelocity(_rb.linearVelocity.x);
+        AnimFloat("Speed", Mathf.Abs(_rb.linearVelocity.x));
     }
 }

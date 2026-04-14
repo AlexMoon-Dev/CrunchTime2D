@@ -1,6 +1,126 @@
 # CrunchTime2D — Session README
-**Date:** 2026-04-10  
 **Engine:** Unity 6 (URP, 2D)  
+**Repository:** [AlexMoon-Dev/CrunchTime2D](https://github.com/AlexMoon-Dev/CrunchTime2D)
+
+---
+
+## Session — 2026-04-14 | Animation System
+
+**Goal:** Replace all placeholder circles/squares with real pixel-art sprites and wire up the full animation state machine for every entity.
+
+---
+
+### New File: `Assets/Editor/AnimationSetup.cs`
+
+One-shot editor script. Run via **CrunchTime → Setup All Animations** in the Unity menu bar.
+
+**What it does:**
+
+1. **Fills the 7 empty `Player_*.anim` clips** (they existed but had no keyframes) with male character sprites from `Assets/ART/Edits/male_char/`.
+2. **Creates `Assets/Animations/Female/`** — seven `Female_*.anim` clips plus `PlayerAnimator_Female.overrideController` (an `AnimatorOverrideController` that shares the base `PlayerAnimator` state machine logic but substitutes female sprites for every clip).
+3. **Creates `Assets/Animations/Enemies/{Alien|Drone|Hydra|Mage|Mech}/`** — animation clips and a full `AnimatorController` for each enemy type.
+4. **Patches each enemy prefab** (`Runner`, `Shooter`, `Brute`, `Invoker`, `Boss`) via `PrefabUtility.EditPrefabContentsScope`: adds an `Animator` component if missing, assigns the correct controller, switches `SpriteRenderer.drawMode` from `Sliced` to `Simple`, and resets the tint color to white.
+
+---
+
+### Sprite-to-Animation Frame Mapping
+
+Sprites live in `Assets/ART/Edits/<entity>/sprite_01.png … sprite_NN.png`.  
+Frame ranges were determined by reviewing the original sheet PNG for each entity.
+
+| Entity | Idle | Move | Special | Hurt | Die |
+|--------|------|------|---------|------|-----|
+| `enemy_alien` (Runner) | 12–15 | Run 1–11 | — | — | 14–15 |
+| `enemy_drone` (Shooter) | 1–4 | — | Shoot 5–7 | 8–10 | 14–16 |
+| `enemy_hydra` (Boss) | 1–5 | Walk 6–7 | Slam 8–9 | — | 8–9 |
+| `enemy_mage` (Invoker) | 1–3 | — | Summon 4–7, 10–12 | 8–9 | 13–14 |
+| `enemy_mech` (Brute) | 1–2 | Walk 3,4,8,9 | Attack 5–7 | 10–12 | 13–14 |
+| `male_char` (P1) | `poses/standing_idle` | `run/sprite_01–08` | `poses/throwing_side` | `poses/waving_front` | `poses/back` |
+| `female_char` (P2) | `poses/sprite_01` | `run/sprite_01–06` | `poses/sprite_05` | `poses/sprite_07` | `poses/sprite_08` |
+
+---
+
+### Animator State Machines
+
+**Player (shared `PlayerAnimator.controller`)**  
+States: `Idle` → `Run` → `Jump` → `Fall` → `Attack` → `Hurt` → `Die`  
+Parameters: `Speed` (Float), `VerticalSpeed` (Float), `IsGrounded` (Bool), `AttackTrigger`, `HurtTrigger`, `DieTrigger` (Triggers)  
+P1 uses `PlayerAnimator.controller` directly. P2 uses `PlayerAnimator_Female.overrideController`.
+
+**Alien (Runner)**  
+States: `Idle` ↔ `Run` (Speed), `Die` (AnyState trigger)  
+Parameters: `Speed`, `HurtTrigger`, `DieTrigger`
+
+**Drone (Shooter)**  
+States: `Idle`, `Shoot`, `Hurt`, `Die` (all AnyState triggers; Shoot/Hurt exit back to Idle)  
+Parameters: `ShootTrigger`, `HurtTrigger`, `DieTrigger`
+
+**Hydra (Boss)**  
+States: `Idle` ↔ `Walk` (Speed), `Slam` (AnyState trigger, exits to Walk), `Die`  
+Parameters: `Speed`, `SlamTrigger`, `HurtTrigger`, `DieTrigger`
+
+**Mage (Invoker)**  
+States: `Idle`, `Summon`, `Hurt`, `Die` (AnyState triggers; Summon/Hurt exit to Idle)  
+Parameters: `Speed`, `SummonTrigger`, `HurtTrigger`, `DieTrigger`
+
+**Mech (Brute)**  
+States: `Idle` ↔ `Walk` (Speed), `Attack`, `Hurt` (AnyState triggers; Attack exits to Walk, Hurt to Idle), `Die`  
+Parameters: `Speed`, `AttackTrigger`, `HurtTrigger`, `DieTrigger`
+
+---
+
+### Modified Scripts
+
+#### `Assets/Scripts/Enemies/EnemyBase.cs`
+- Added `protected SpriteRenderer _sr` and `protected Animator _animator`, initialized in `Awake`.
+- Added `public float deathAnimDuration = 0.6f` — delay between death trigger and `Destroy`.
+- Added protected helpers: `AnimFloat(string, float)`, `AnimTrigger(string)`, `FaceTarget()`, `FaceVelocity(float)`.
+- `TakeDamage`: fires `HurtTrigger` on non-lethal hits.
+- `Die`: refactored into `AwardXP()` (virtual, overridable) + `DieTrigger` + `DestroyAfterDelay` coroutine. Stops velocity before destroy.
+- **Breaking change:** `BossEnemy.Die()` override replaced with `BossEnemy.AwardXP()` override (same split XP logic, cleaner separation).
+
+#### `Assets/Scripts/Enemies/RunnerEnemy.cs`
+- `Behave`: calls `FaceVelocity(_rb.linearVelocity.x)` and `AnimFloat("Speed", ...)`.
+
+#### `Assets/Scripts/Enemies/ShooterEnemy.cs`
+- `Behave`: calls `FaceTarget()`.
+- `FireAt`: calls `AnimTrigger("ShootTrigger")` before instantiating the projectile.
+
+#### `Assets/Scripts/Enemies/BruteEnemy.cs`
+- `Behave`: calls `FaceTarget()`, `AnimFloat("Speed", ...)`, and `AnimTrigger("AttackTrigger")` on attack.
+
+#### `Assets/Scripts/Enemies/InvokerEnemy.cs`
+- `Behave`: calls `FaceTarget()` and `AnimFloat("Speed", ...)`.
+- `SummonRandom`: calls `AnimTrigger("SummonTrigger")` before instantiating the summoned enemy.
+
+#### `Assets/Scripts/Enemies/BossEnemy.cs`
+- `GroundSlam` coroutine: calls `AnimTrigger("SlamTrigger")` at start of the slam sequence.
+- Replaced `Die()` override with `AwardXP()` override (death sequencing now handled by `EnemyBase.Die()`).
+
+#### `Assets/Scripts/Player/PlayerController.cs`
+- Added `private SpriteRenderer _sr`, initialized in `Awake`.
+- `UpdateFacing`: replaced `transform.localScale = new Vector3(FacingDir, 1, 1)` with `_sr.flipX = FacingDir < 0`. Fixes child-object scale distortion that would occur with the old approach once real sprites replace the placeholder.
+
+#### `Assets/Scripts/Player/PlayerSetup.cs`
+- Added `public RuntimeAnimatorController maleController` and `femaleController` Inspector fields.
+- `Awake`: applies the correct controller to the `Animator` component based on `playerIndex` (0 = male, 1 = female).
+- Removed placeholder `sr.color = playerColor` tint — coloring is no longer needed once the real sprites are active.
+
+---
+
+### Post-Setup Inspector Steps (one-time, after running the menu item)
+
+1. On **Player1** (`playerIndex = 0`) `PlayerSetup` component:
+   - `Male Controller` → `Assets/Animations/Player/PlayerAnimator.controller`
+   - `Female Controller` → `Assets/Animations/Female/PlayerAnimator_Female.overrideController`
+2. On **Player2** (`playerIndex = 1`) `PlayerSetup` component — same fields, same assets.
+3. Verify each enemy prefab has an `Animator` component with its controller assigned (should be automatic from the setup script).
+4. Optionally disable `PlayerVisualFeedback` on player GameObjects once the `Hurt` animation is confirmed working — the component was a placeholder (red flash / green outline) and is no longer needed.
+
+---
+
+## Session — 2026-04-10 | Core Systems
+
 **Session goal:** Build a barebones 2-player local co-op roguelike platformer loop from scratch.
 
 ---
@@ -22,17 +142,17 @@
 | `Player/` | `PlayerCombat.cs` | Class-switched attack logic (Tank/Fighter/Ranger). Routes damage through `CombatEventSystem`. Exposes `perkBulwark` and `perkArsenal` flags set by class perks. |
 | `Player/` | `PlayerLeveling.cs` | XP tracking. Threshold = `100 * level^1.2`. Fires `OnLevelUp`. Tracks collected perks by name (for `HasPerk()` checks) and by reference (for history panel). |
 | `Player/` | `PlayerRespawnHandler.cs` | On death: starts timer (`5s + deathCount * 3s`), disables player, checks if all players dead → Game Over. Respawns at 50% HP at `respawnPoint`. |
-| `Player/` | `PlayerSetup.cs` | Glue component. Sets `playerIndex`, tints sprite, forces correct control scheme on `PlayerInput` at `Start()`. |
+| `Player/` | `PlayerSetup.cs` | Glue component. Sets `playerIndex`, forces correct control scheme on `PlayerInput`. Applies the correct `RuntimeAnimatorController` (`maleController` / `femaleController`) at `Awake` based on `playerIndex`. |
 | `Classes/` | `ClassDefinitionSO.cs` | ScriptableObject. Holds base stat deltas applied on class selection, class name/description, and list of class perks (offered every 10 levels). |
 | `Classes/` | `ClassManager.cs` | Singleton. Enforces class-lock via static events `OnClassConfirmed` and `OnClassLocked`. Ranger is the only single-pick class. On both confirmed: applies stats, calls `GameManager.StartWave()`. |
 | `Perks/` | `PerkSO.cs` | Base ScriptableObject. `Apply(PlayerStats)` for one-time stat changes. `Equip(PlayerLeveling)` for subscribing to `CombatEventSystem` events. `Unequip()` for cleanup. |
 | `Perks/` | `PerkDatabase.cs` | Holds all `PerkSO` assets. `GetWeightedSelection(classType, owned, count)` returns a weighted random pool excluding already-owned perks. |
-| `Enemies/` | `EnemyBase.cs` | Base enemy. Awards XP on death. `ApplyDifficultyMultiplier()` scales stats. `ApplyStun()` coroutine. Damages player on `OnCollisionStay2D`. |
-| `Enemies/` | `RunnerEnemy.cs` | Charges at nearest player. Fast, low HP. |
-| `Enemies/` | `ShooterEnemy.cs` | Maintains distance, fires `EnemyProjectile` at a configurable fire rate. |
-| `Enemies/` | `BruteEnemy.cs` | Slow, high HP/damage, heavy knockback. |
-| `Enemies/` | `InvokerEnemy.cs` | Flees from players. Summons a random enemy every 8s. Uses `WaveManager.CurrentDifficulty` on spawned enemies. |
-| `Enemies/` | `BossEnemy.cs` | 5x Brute HP. Ground slam every 8s that spawns horizontal `Shockwave` in both directions. Splits bonus XP on death. |
+| `Enemies/` | `EnemyBase.cs` | Base enemy. Awards XP on death via overridable `AwardXP()`. `ApplyDifficultyMultiplier()` scales stats. `ApplyStun()` coroutine. Damages player on `OnCollisionStay2D`. Drives `Animator` + `SpriteRenderer` facing via `FaceTarget()` / `FaceVelocity()`. |
+| `Enemies/` | `RunnerEnemy.cs` | Charges at nearest player. Drives `Speed` animator param and sprite facing. |
+| `Enemies/` | `ShooterEnemy.cs` | Maintains distance, fires `EnemyProjectile`. Fires `ShootTrigger` on the animator each shot. Faces target. |
+| `Enemies/` | `BruteEnemy.cs` | Slow, high HP/damage, heavy knockback. Drives `Speed` + `AttackTrigger` animator params. Faces target. |
+| `Enemies/` | `InvokerEnemy.cs` | Flees from players. Summons a random enemy every 8s. Fires `SummonTrigger` on summon. Drives `Speed` + facing. |
+| `Enemies/` | `BossEnemy.cs` | 5x Brute HP. Ground slam every 8s fires `SlamTrigger` then spawns `Shockwave`. `AwardXP()` override splits bonus XP. |
 | `Enemies/` | `Shockwave.cs` | Travels horizontally on a Rigidbody2D, damages players on trigger. |
 | `Enemies/` | `EnemyProjectile.cs` | Simple trigger projectile that deals damage to `PlayerStats` on contact. |
 | `Arena/` | `ArenaBuilder.cs` | Builds the entire arena at runtime using colored 1-pixel sprites + `BoxCollider2D`. Ground floor + 3 one-way platforms. Sets camera orthographic size. Places spawn points on `WaveManager`. |
@@ -59,7 +179,7 @@
 
 ### Prefabs (`Assets/Prefabs/`)
 
-- `Enemies/` — Runner, Shooter, Brute, Invoker, Boss (all colored placeholder sprites)
+- `Enemies/` — Runner, Shooter, Brute, Invoker, Boss. Each has `SpriteRenderer` + `BoxCollider2D` + `Rigidbody2D`. After running **CrunchTime → Setup All Animations**, each also gets an `Animator` with its entity-specific controller assigned.
 - `Projectiles/` — PlayerProjectile, EnemyProjectile, Shockwave
 - `UI/PerkCard.prefab` — reusable perk card used by `LevelUpUIController`
 
@@ -111,6 +231,13 @@ Other possible causes:
 1. **PlayerInput actions not saved** — The `set_property` MCP call for the `.inputactions` asset failed during setup. Verify `Player1` and `Player2` have `GameInputActions.inputactions` assigned in their `PlayerInput` component.
 2. **Canvas not set to Screen Space Overlay** — check the `UICanvas` Canvas component's Render Mode.
 3. **`Time.timeScale = 0`** — `GameState.ClassSelection` pauses time. This is intentional and does not affect UI EventSystem, but double-check that `GameManager.SetState` is being called correctly on `Start()`.
+
+### TODOs carried over / animation follow-ups
+- Run **CrunchTime → Setup All Animations** once on project open to generate all animation assets
+- Drag `PlayerAnimator.controller` → `PlayerSetup.maleController` and `PlayerAnimator_Female.overrideController` → `PlayerSetup.femaleController` on both player GameObjects
+- `PlayerVisualFeedback` (red hit flash, green attack outline) can be disabled once `Hurt` / `Attack` animations are confirmed working
+- Death animations play for `deathAnimDuration` (0.6s) before destroy — tune per enemy in the Inspector
+- The Alien and Hydra have no dedicated hurt frames; `HurtTrigger` is still raised in code but has no Hurt state in their controllers — add one if needed
 
 ### Other TODOs for next session
 - Add `PerkHistoryEntry` prefab (currently the script exists but there's no prefab assigned to `PerkHistoryPanel.entryPrefab`)

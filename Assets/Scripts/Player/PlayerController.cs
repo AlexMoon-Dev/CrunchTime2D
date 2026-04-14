@@ -20,10 +20,11 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayers;
 
     // ── Internal state ────────────────────────────────────────────────────────
-    private Rigidbody2D  _rb;
-    private PlayerStats  _stats;
-    private PlayerCombat _combat;
-    private Animator     _animator;
+    private Rigidbody2D    _rb;
+    private PlayerStats    _stats;
+    private PlayerCombat   _combat;
+    private Animator       _animator;
+    private SpriteRenderer _sr;
 
     private Vector2 _moveInput;
     private bool    _jumpPressed;
@@ -57,10 +58,11 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        _rb       = GetComponent<Rigidbody2D>();
-        _stats    = GetComponent<PlayerStats>();
-        _combat   = GetComponent<PlayerCombat>();
-        _animator = GetComponent<Animator>();
+        _rb         = GetComponent<Rigidbody2D>();
+        _stats      = GetComponent<PlayerStats>();
+        _combat     = GetComponent<PlayerCombat>();
+        _animator   = GetComponent<Animator>();
+        _sr         = GetComponent<SpriteRenderer>();
         _mainCamera = Camera.main;
     }
 
@@ -229,10 +231,10 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateFacing()
     {
-        if (_moveInput.x > 0.1f)       FacingDir =  1;
+        if      (_moveInput.x >  0.1f) FacingDir =  1;
         else if (_moveInput.x < -0.1f) FacingDir = -1;
-        // Flip sprite — TODO: replace with animator when art is added
-        transform.localScale = new Vector3(FacingDir, 1f, 1f);
+
+        if (_sr != null) _sr.flipX = FacingDir < 0;
     }
 
     // ── Input callbacks (wired by PlayerInput component) ─────────────────────

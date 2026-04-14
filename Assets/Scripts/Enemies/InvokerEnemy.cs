@@ -44,6 +44,9 @@ public class InvokerEnemy : EnemyBase
         {
             _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
         }
+
+        FaceTarget();
+        AnimFloat("Speed", Mathf.Abs(_rb.linearVelocity.x));
     }
 
     private IEnumerator SummonRoutine()
@@ -58,9 +61,10 @@ public class InvokerEnemy : EnemyBase
     private void SummonRandom()
     {
         var prefabs = new[] { runnerPrefab, shooterPrefab, brutePrefab };
-        // Filter nulls
         var valid = System.Array.FindAll(prefabs, p => p != null);
         if (valid.Length == 0) return;
+
+        AnimTrigger("SummonTrigger");
 
         var chosen = valid[Random.Range(0, valid.Length)];
         Vector3 offset = new Vector3(Random.Range(-1f, 1f), 0.5f, 0f);

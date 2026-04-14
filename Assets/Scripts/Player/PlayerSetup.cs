@@ -15,18 +15,23 @@ using UnityEngine.InputSystem;
 public class PlayerSetup : MonoBehaviour
 {
     [Header("Identity")]
-    public int playerIndex = 0;   // 0 = P1 (KB+Mouse), 1 = P2 (Gamepad)
+    public int playerIndex = 0;   // 0 = P1 Male (KB+Mouse), 1 = P2 Female (Gamepad)
 
-    [Header("Visual — placeholder colored sprite")]
-    public Color playerColor = Color.blue;
+    [Header("Animator Controllers")]
+    public RuntimeAnimatorController maleController;    // PlayerAnimator.controller
+    public RuntimeAnimatorController femaleController;  // PlayerAnimator_Female.overrideController
 
     private void Awake()
     {
         GetComponent<PlayerStats>().playerIndex = playerIndex;
 
-        // Color-code players for placeholder art
-        var sr = GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = playerColor;
+        // Apply character-specific animator
+        var anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            var ctrl = playerIndex == 0 ? maleController : femaleController;
+            if (ctrl != null) anim.runtimeAnimatorController = ctrl;
+        }
     }
 
     /// <summary>

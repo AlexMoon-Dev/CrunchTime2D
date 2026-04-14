@@ -39,6 +39,8 @@ public class ShooterEnemy : EnemyBase
         else
             _rb.linearVelocity = new Vector2(0f, _rb.linearVelocity.y);
 
+        FaceTarget();
+
         _fireCooldown -= Time.deltaTime;
         if (_fireCooldown <= 0f)
         {
@@ -49,6 +51,7 @@ public class ShooterEnemy : EnemyBase
 
     private void FireAt(Vector3 targetPos)
     {
+        AnimTrigger("ShootTrigger");
         if (projectilePrefab == null) return;
         var go  = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
         var rb  = go.GetComponent<Rigidbody2D>();

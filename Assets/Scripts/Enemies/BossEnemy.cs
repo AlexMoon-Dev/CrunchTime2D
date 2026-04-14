@@ -44,6 +44,8 @@ public class BossEnemy : BruteEnemy
 
     private IEnumerator GroundSlam()
     {
+        AnimTrigger("SlamTrigger");
+
         // Brief telegraph
         yield return new WaitForSeconds(0.4f);
 
@@ -92,10 +94,8 @@ public class BossEnemy : BruteEnemy
         }
     }
 
-    protected override void Die()
+    protected override void AwardXP()
     {
-        _currentHealth = 0f;
-        // Bonus XP to all living players
         var players = FindObjectsByType<PlayerLeveling>(FindObjectsSortMode.None);
         float split = bonusXP / Mathf.Max(1, players.Length);
         foreach (var p in players)
@@ -103,7 +103,5 @@ public class BossEnemy : BruteEnemy
             var stats = p.GetComponent<PlayerStats>();
             if (stats != null && !stats.IsDead) p.AddXP(xpValue + split);
         }
-        // TODO: death VFX
-        Destroy(gameObject);
     }
 }

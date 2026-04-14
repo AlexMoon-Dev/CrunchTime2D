@@ -12,22 +12,29 @@ public class EnemyBase : MonoBehaviour
     public float armor      = 0f;
     public float knockbackForce = 4f;
 
+    [Header("Death")]
+    public float deathAnimDuration = 0.6f;   // seconds before object is destroyed
+
     [Header("Runtime")]
     [SerializeField] protected float _currentHealth;
 
     public float CurrentHealth => _currentHealth;
     public bool  IsDead        => _currentHealth <= 0f;
 
-    protected Rigidbody2D _rb;
-    protected Transform   _target;
-    protected bool        _stunned;
+    protected Rigidbody2D    _rb;
+    protected SpriteRenderer _sr;
+    protected Animator       _animator;
+    protected Transform      _target;
+    protected bool           _stunned;
 
     private float _contactDamageCooldown;
 
     public virtual void Awake()
     {
-        _rb             = GetComponent<Rigidbody2D>();
-        _currentHealth  = maxHealth;
+        _rb            = GetComponent<Rigidbody2D>();
+        _sr            = GetComponent<SpriteRenderer>();
+        _animator      = GetComponent<Animator>();
+        _currentHealth = maxHealth;
     }
 
     public virtual void Start()
@@ -45,6 +52,24 @@ public class EnemyBase : MonoBehaviour
 
     /// <summary>Override in subclass to implement AI movement/attack logic.</summary>
     protected virtual void Behave() { }
+
+    // ── Animation helpers ─────────────────────────────────────────────────────
+
+    protected void AnimFloat(string param, float v)   => _animator?.SetFloat(param, v);
+    protected void AnimTrigger(string param)           => _animator?.SetTrigger(param);
+
+    /// <summary>Flips the SpriteRenderer to face left or right based on horizontal movement.</summary>
+    protected void FaceTarget()
+    {
+        if (_target == null || _sr == null) return;
+        _sr.flipX = _target.position.x < transform.position.x;
+    }
+
+    protected void FaceVelocity(float velX)
+    {
+        if (_sr == null || Mathf.Abs(velX) < 0.05f) return;
+        _sr.flipX = velX < 0f;
+    }
 
     // ── Damage ───────────────────────────────────────────────────────────────
 
@@ -65,17 +90,13 @@ public class EnemyBase : MonoBehaviour
             Die();
             return true;
         }
+
+        AnimTrigger("HurtTrigger");
         return false;
     }
 
-    protected virtual void Die()
+    protected virtual void AwardXP()
     {
-        _currentHealth = 0f;
-        // Destroy first — Destroy is deferred to end-of-frame, so XP code below
-        // still runs, but any exception in the event chain can never leave a zombie.
-        Destroy(gameObject);
-
-        // Award XP to all living players
         var players = FindObjectsByType<PlayerLeveling>(FindObjectsSortMode.None);
         foreach (var p in players)
         {
@@ -83,7 +104,21 @@ public class EnemyBase : MonoBehaviour
             if (stats != null && !stats.IsDead)
                 p.AddXP(xpValue);
         }
-        // TODO: play death VFX
+    }
+
+    protected virtual void Die()
+    {
+        _currentHealth = 0f;
+        AwardXP();
+        AnimTrigger("DieTrigger");
+        StartCoroutine(DestroyAfterDelay(deathAnimDuration));
+    }
+
+    private IEnumerator DestroyAfterDelay(float delay)
+    {
+        _rb.linearVelocity = Vector2.zero;
+        yield return new WaitForSeconds(delay);
+        Destroy(gameObject);
     }
 
     public void ApplyDifficultyMultiplier(float multiplier)
