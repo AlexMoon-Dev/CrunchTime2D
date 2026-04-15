@@ -25,11 +25,10 @@ public class PauseMenuHandler : MonoBehaviour
             return;
         }
 
-        // Layer 2: toggle pause only during Wave or Paused states
+        // Layer 2: toggle pause — allowed in any state except GameOver
         if (GameManager.Instance != null)
         {
-            var state = GameManager.Instance.CurrentState;
-            if (state == GameState.Wave || state == GameState.Paused)
+            if (GameManager.Instance.CurrentState != GameState.GameOver)
                 Toggle();
         }
         else

@@ -12,20 +12,16 @@ using UnityEngine.InputSystem.UI;
 #endif
 
 /// <summary>
-/// One-shot editor tool: CrunchTime ▶ Setup Menu Scenes
+/// Editor tools under CrunchTime ▶ Menus —
 ///
-/// • Creates Assets/Scenes/MainMenu.unity with a full-screen background,
-///   three transparent hit-area buttons (START / OPTIONS / EXIT), and a
-///   settings panel (General / SFX / Music sliders).
-///
-/// • Injects a PauseMenuCanvas + PauseMenuHandler into GameScene
-///   with three hit-area buttons (BACK / EXIT / SETTINGS) and the
-///   same style settings panel.
-///
-/// • Adds both scenes to Build Settings (MainMenu = 0, GameScene = 1).
+///   Setup Main Menu Scene   — (re)creates MainMenu.unity from scratch.
+///   Inject Pause Menu       — adds PauseMenuHandler + PauseMenuCanvas into GameScene only.
+///                             Safe to re-run: skips if already present.
+///   Configure Build Settings — sets MainMenu(0) / GameScene(1).
+///   Setup All Menus         — runs all three in sequence.
 ///
 /// Button anchor positions are tuned to match Assets/ART/1.jpg and 2.jpg.
-/// Tweak them in the Inspector if the clickable zones feel off after resizing.
+/// Tweak them in the Inspector if clickable zones feel off.
 /// </summary>
 public static class MenuSetup
 {
@@ -34,18 +30,44 @@ public static class MenuSetup
     const string BG_START        = "Assets/ART/1.jpg";
     const string BG_PAUSE        = "Assets/ART/2.jpg";
 
-    [MenuItem("CrunchTime/Setup Menu Scenes")]
-    public static void SetupMenuScenes()
+    // ── Menu entries ──────────────────────────────────────────────────────────
+
+    [MenuItem("CrunchTime/Menus/Setup All Menus")]
+    public static void SetupAllMenus()
     {
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
-
         BuildMainMenuScene();
         InjectPauseMenuIntoGameScene();
         ConfigureBuildSettings();
-
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[CrunchTime] Menu scenes ready. Open MainMenu.unity to verify.");
+        Debug.Log("[CrunchTime] All menus set up. Open MainMenu.unity to verify.");
+    }
+
+    [MenuItem("CrunchTime/Menus/Setup Main Menu Scene")]
+    public static void SetupMainMenuScene()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        BuildMainMenuScene();
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[CrunchTime] MainMenu.unity rebuilt.");
+    }
+
+    [MenuItem("CrunchTime/Menus/Inject Pause Menu into GameScene")]
+    public static void SetupPauseMenu()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        InjectPauseMenuIntoGameScene();
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+    }
+
+    [MenuItem("CrunchTime/Menus/Configure Build Settings")]
+    public static void SetupBuildSettings()
+    {
+        ConfigureBuildSettings();
+        AssetDatabase.SaveAssets();
     }
 
     // ── Main Menu scene ───────────────────────────────────────────────────────
