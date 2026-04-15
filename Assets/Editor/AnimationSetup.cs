@@ -247,7 +247,7 @@ public static class AnimationSetup
         AddSpeedTransitions(idle, run);
         AnyTo(sm, die, "DieTrigger");
 
-        WirePrefab("Assets/Prefabs/Enemies/Runner.prefab", ctrl);
+        WirePrefab("Assets/Prefabs/Enemies/Runner.prefab", ctrl, new Vector2(0.7f, 0.85f));
         Debug.Log("[CrunchTime] Alien set up.");
     }
 
@@ -281,7 +281,7 @@ public static class AnimationSetup
         ExitTo(shoot, idle);
         ExitTo(hurt,  idle);
 
-        WirePrefab("Assets/Prefabs/Enemies/Shooter.prefab", ctrl);
+        WirePrefab("Assets/Prefabs/Enemies/Shooter.prefab", ctrl, new Vector2(0.45f, 0.55f));
         Debug.Log("[CrunchTime] Drone set up.");
     }
 
@@ -314,7 +314,7 @@ public static class AnimationSetup
         AnyTo(sm, die,  "DieTrigger");
         ExitTo(slam, walk);
 
-        WirePrefab("Assets/Prefabs/Enemies/Boss.prefab", ctrl);
+        WirePrefab("Assets/Prefabs/Enemies/Boss.prefab", ctrl, new Vector2(0.85f, 1.6f));
         Debug.Log("[CrunchTime] Hydra set up.");
     }
 
@@ -348,7 +348,7 @@ public static class AnimationSetup
         ExitTo(summon, idle);
         ExitTo(hurt,   idle);
 
-        WirePrefab("Assets/Prefabs/Enemies/Invoker.prefab", ctrl);
+        WirePrefab("Assets/Prefabs/Enemies/Invoker.prefab", ctrl, new Vector2(0.55f, 1.15f));
         Debug.Log("[CrunchTime] Mage set up.");
     }
 
@@ -385,7 +385,7 @@ public static class AnimationSetup
         ExitTo(attack, walk);
         ExitTo(hurt,   idle);
 
-        WirePrefab("Assets/Prefabs/Enemies/Brute.prefab", ctrl);
+        WirePrefab("Assets/Prefabs/Enemies/Brute.prefab", ctrl, new Vector2(0.75f, 1.15f));
         Debug.Log("[CrunchTime] Mech set up.");
     }
 
@@ -418,9 +418,11 @@ public static class AnimationSetup
 
     /// <summary>
     /// Opens the enemy prefab, adds an Animator if missing, assigns the controller,
-    /// switches SpriteRenderer to Simple draw mode, and resets the tint to white.
+    /// switches SpriteRenderer to Simple draw mode, resets the tint to white,
+    /// resets the transform scale to (1,1,1), and sets the BoxCollider2D size.
     /// </summary>
-    static void WirePrefab(string prefabPath, RuntimeAnimatorController ctrl)
+    static void WirePrefab(string prefabPath, RuntimeAnimatorController ctrl,
+        Vector2 colliderSize = default, Vector2 colliderOffset = default)
     {
         using var scope = new PrefabUtility.EditPrefabContentsScope(prefabPath);
         var root = scope.prefabContentsRoot;
@@ -436,6 +438,20 @@ public static class AnimationSetup
         {
             sr.drawMode = SpriteDrawMode.Simple;
             sr.color    = Color.white;
+        }
+
+        // Transform — ensure no stale placeholder scale survives
+        root.transform.localScale = Vector3.one;
+
+        // BoxCollider2D — set a sensible size that fits the sprite
+        if (colliderSize != default)
+        {
+            var col = root.GetComponent<BoxCollider2D>();
+            if (col != null)
+            {
+                col.size   = colliderSize;
+                col.offset = colliderOffset;
+            }
         }
     }
 }
