@@ -3692,7 +3692,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSetup
   playerIndex: 0
-  playerColor: {r: 0.2, g: 0.5, b: 1, a: 1}
+  maleController: {fileID: 9100000, guid: a020a00ce742587459462c6d2065d7f7, type: 2}
+  femaleController: {fileID: 22100000, guid: f6f9086b2c0c31043b84b51485654953, type: 2}
 --- !u!114 &473729214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9291,7 +9292,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSetup
   playerIndex: 1
-  playerColor: {r: 1, g: 0.3, b: 0.2, a: 1}
+  maleController: {fileID: 9100000, guid: a020a00ce742587459462c6d2065d7f7, type: 2}
+  femaleController: {fileID: 22100000, guid: f6f9086b2c0c31043b84b51485654953, type: 2}
 --- !u!114 &1072974106
 MonoBehaviour:
   m_ObjectHideFlags: 0

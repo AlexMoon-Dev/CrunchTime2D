@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6921572302860449935}
   - component: {fileID: 8625420000815438557}
   - component: {fileID: 94928544828237863}
+  - component: {fileID: 8812782718871511019}
   m_Layer: 9
   m_Name: Boss
   m_TagString: Untagged
@@ -85,10 +86,10 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.3, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 1
+  m_DrawMode: 0
   m_Size: {x: 0.16, y: 0.16}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
@@ -135,7 +136,7 @@ BoxCollider2D:
     oldSize: {x: 0.16, y: 0.16}
     newSize: {x: 0.16, y: 0.16}
     adaptiveTilingThreshold: 0.5
-    drawMode: 1
+    drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 2, y: 2.2}
@@ -185,6 +186,7 @@ MonoBehaviour:
   xpValue: 10
   armor: 0
   knockbackForce: 4
+  deathAnimDuration: 0.6
   _currentHealth: 0
   attackCooldown: 1.5
   slamCooldown: 8
@@ -193,3 +195,25 @@ MonoBehaviour:
   shockwaveWidth: 0.8
   bonusXP: 200
   shockwavePrefab: {fileID: 2631559226588043882, guid: 4ba08d05fd40a5d48b32e4c6393729bd, type: 3}
+--- !u!95 &8812782718871511019
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8082791739607152862}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e145982975ccb2f4bb719f51ac156c9e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

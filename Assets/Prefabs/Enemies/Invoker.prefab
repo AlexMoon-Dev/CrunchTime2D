@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8774720219093809556}
   - component: {fileID: 423742403153298307}
   - component: {fileID: 3583237450631213635}
+  - component: {fileID: 431421258093359830}
   m_Layer: 9
   m_Name: Invoker
   m_TagString: Untagged
@@ -85,10 +86,10 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.7, g: 0.3, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 1
+  m_DrawMode: 0
   m_Size: {x: 0.2, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
@@ -135,7 +136,7 @@ BoxCollider2D:
     oldSize: {x: 0.2, y: 0.2}
     newSize: {x: 0.2, y: 0.2}
     adaptiveTilingThreshold: 0.5
-    drawMode: 1
+    drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 0.8, y: 1.1}
@@ -185,8 +186,31 @@ MonoBehaviour:
   xpValue: 10
   armor: 0
   knockbackForce: 4
+  deathAnimDuration: 0.6
   _currentHealth: 0
   summonInterval: 8
   runnerPrefab: {fileID: 3925677547647385689, guid: b12e132e786a4334a9c87c041200dca9, type: 3}
   shooterPrefab: {fileID: 5595252516903388550, guid: 8ba133502e4bcfc43bd8ee089e3b68b1, type: 3}
   brutePrefab: {fileID: 4261978700698659860, guid: 7ea7857ea34397740a33d736b920ad1b, type: 3}
+--- !u!95 &431421258093359830
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5471892998336226780}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 493613cfba6b24e48a0132112162aa3c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
