@@ -4,6 +4,97 @@
 
 ---
 
+## Session — 2026-04-15 | Menu System & Volume Settings
+
+**Goal:** Build the start menu scene, in-game pause menu, and a 3-channel volume settings panel. Fix outstanding collider sizing on all enemy prefabs. Harden the editor tooling so individual steps can be run without clobbering existing work.
+
+---
+
+### New Scenes
+
+| Scene | Path | Purpose |
+|-------|------|---------|
+| `MainMenu` | `Assets/Scenes/MainMenu.unity` | Start screen — full-screen background (`ART/1.jpg`), three invisible hit-area buttons over the baked-in button art (START / OPTIONS / EXIT), settings panel overlay |
+| `GameScene` | `Assets/Scenes/GameScene.unity` | Main game (renamed from `SampleScene`). Now also contains `PauseMenuHandler` + `PauseMenuCanvas` |
+
+Build Settings order: **MainMenu = 0 · GameScene = 1**
+
+---
+
+### New Scripts — `Assets/Scripts/UI/`
+
+#### `VolumeSettings.cs`
+- Singleton (`DontDestroyOnLoad`). Stores **General / SFX / Music** volumes as floats (0–1) in `PlayerPrefs` so they survive sessions.
+- Exposes `SetMaster(float)`, `SetSFX(float)`, `SetMusic(float)`.
+- **AudioMixer hookup is a 2-line uncomment** — add a public `AudioMixer` field, expose parameters `MasterVolume` / `SFXVolume` / `MusicVolume` (dB), uncomment the `SetFloat` call in `Save()`.
+
+#### `VolumeSliderController.cs`
+- `[RequireComponent(typeof(Slider))]`. Set `VolumeType` enum (`Master / SFX / Music`) in the Inspector.
+- On first activation (`Start`): reads the saved value from `VolumeSettings.Instance` with `SetValueWithoutNotify` (no spurious save on open), then subscribes `onValueChanged`.
+
+#### `SettingsPanelController.cs`
+- Sits on the settings panel root. Provides `Open()` / `Close()` as persistent-listener-friendly methods so buttons can target the panel directly without needing a reference up to the parent controller.
+
+#### `MainMenuController.cs`
+- **START** → `SceneManager.LoadScene("GameScene")`
+- **OPTIONS** → `settingsPanel.Open()`
+- **EXIT** → `Application.Quit()`
+
+#### `PauseMenuHandler.cs`
+- Lives on an empty root `GameObject` in `GameScene`.
+- **Esc key** (New Input System — `Keyboard.current.escapeKey.wasPressedThisFrame`) toggles pause, with two priority layers:
+  1. If paused **and** settings panel is open → close settings only.
+  2. Otherwise → toggle pause (allowed in any `GameState` except `GameOver`).
+- Pause calls `GameManager.Instance.SetState(GameState.Paused)` — `GameManager` already handles `Time.timeScale`.
+- Resume calls `GameManager.Instance.SetState(GameState.Wave)`.
+- **BACK** → resume. **SETTINGS** → `settingsPanel.Open()`. **EXIT** → `CombatEventSystem.ClearAll()` + load `MainMenu`.
+
+---
+
+### New Editor Script — `Assets/Editor/MenuSetup.cs`
+
+Programmatically builds both menu scenes. Available under **CrunchTime > Menus**:
+
+| Menu item | What it does |
+|-----------|-------------|
+| **Setup All Menus** | Runs all three steps in sequence |
+| **Setup Main Menu Scene** | (Re)creates `MainMenu.unity` from scratch — camera, EventSystem, Canvas, background `RawImage`, 3 transparent hit-area buttons, settings panel |
+| **Inject Pause Menu into GameScene** | Opens `GameScene.unity` additively, adds `PauseMenuHandler` GO + `PauseMenuCanvas` (initially inactive, sort order 100) with background, 3 hit-area buttons, and settings panel. Skips if already present |
+| **Configure Build Settings** | Sets `MainMenu(0)` / `GameScene(1)` |
+
+**Hit-area button approach:** The background JPG is the complete visual — buttons are invisible `Image` components (`color.a = 0`, `raycastTarget = true`) anchored to match where the button art lives in the image. Adjust anchor handles in the Scene view if zones feel off.
+
+**Settings panel layout:** Dark semi-transparent panel centred at 25–75% of screen width/height. Three rows (GENERAL · SFX · MUSIC), each with a label and a `Slider` + `VolumeSliderController`. CLOSE button at the bottom calls `SettingsPanelController.Close()`.
+
+---
+
+### `Assets/Editor/AnimationSetup.cs` — Collider Size Fix
+
+All five `WirePrefab` calls now pass sprite-proportional `BoxCollider2D` sizes so a re-run of **Setup All Animations** produces correct hitboxes at scale (1, 1, 1):
+
+| Enemy | Collider size |
+|-------|--------------|
+| Alien / Runner | 0.70 × 0.85 |
+| Drone / Shooter | 0.45 × 0.55 |
+| Hydra / Boss | 0.85 × 1.60 |
+| Mage / Invoker | 0.55 × 1.15 |
+| Mech / Brute | 0.75 × 1.15 |
+
+---
+
+### Scene Rename — `SampleScene` → `GameScene`
+
+All string references updated:
+
+| File | Change |
+|------|--------|
+| `Scripts/UI/MainMenuController.cs` | `LoadScene("SampleScene")` → `"GameScene"` |
+| `Editor/MenuSetup.cs` | `GAME_SCENE` const path + all comments |
+| `Scripts/UI/PauseMenuHandler.cs` | Doc comment |
+| `ProjectSettings/EditorBuildSettings.asset` | Regenerated automatically by **Configure Build Settings** |
+
+---
+
 ## Session — 2026-04-14 | Animation System
 
 **Goal:** Replace all placeholder circles/squares with real pixel-art sprites and wire up the full animation state machine for every entity.
