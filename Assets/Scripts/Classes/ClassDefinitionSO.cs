@@ -21,6 +21,10 @@ public class ClassDefinitionSO : ScriptableObject
     [Header("Class Perks (offered every 10 levels)")]
     public List<PerkSO> classPerks = new List<PerkSO>();
 
+    [Header("Animator Overrides")]
+    public RuntimeAnimatorController maleOverrideController;
+    public RuntimeAnimatorController femaleOverrideController;
+
     /// <summary>Apply base stat bonuses to a player on class selection.</summary>
     public void ApplyBaseStats(PlayerStats stats)
     {

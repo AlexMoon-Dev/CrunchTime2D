@@ -63,7 +63,18 @@ public class ClassManager : MonoBehaviour
         var players = FindObjectsByType<PlayerStats>(FindObjectsSortMode.None);
         foreach (var p in players)
         {
-            _selectedDefs[p.playerIndex]?.ApplyBaseStats(p);
+            var def = _selectedDefs[p.playerIndex];
+            def?.ApplyBaseStats(p);
+
+            var animator = p.GetComponent<Animator>();
+            if (animator != null && def != null)
+            {
+                var ctrl = p.playerIndex == 0
+                    ? def.maleOverrideController
+                    : def.femaleOverrideController;
+                if (ctrl != null)
+                    animator.runtimeAnimatorController = ctrl;
+            }
         }
         GameManager.Instance?.StartWave();
     }

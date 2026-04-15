@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e436292c9a0eacb4ca22e9def0d3f868
+guid: 1ae729d833ee56a29b6e5e723263ec5d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4673894616387741621
-    second: Gemini_Generated_Image_962p962p962p962p_0
+      213: 6401424850746407889
+    second: m_archer_walk_01_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gemini_Generated_Image_962p962p962p962p_0
+      name: m_archer_walk_01_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 784
-        height: 1350
+        width: 185
+        height: 179
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b4819981c9df22fb0800000000000000
-      internalID: -4673894616387741621
+      spriteID: 3c8cec18df5f84120800000000000000
+      internalID: 6401424850746407889
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gemini_Generated_Image_962p962p962p962p_0: -4673894616387741621
+      m_archer_walk_01_0: 6401424850746407889
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

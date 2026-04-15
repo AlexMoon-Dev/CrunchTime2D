@@ -73,7 +73,6 @@ public class PlayerStats : MonoBehaviour
         }
         else
         {
-            GetComponent<PlayerController>()?.TriggerHurtAnim();
             GetComponent<PlayerVisualFeedback>()?.OnHit();
         }
     }

@@ -25,3 +25,5 @@ MonoBehaviour:
   classPerks:
   - {fileID: 11400000, guid: 6ccdd24514db6624bb82a860dc03c3b5, type: 2}
   - {fileID: 11400000, guid: 1d1d4a789b69c1f43960f6f6dadeb105, type: 2}
+  maleOverrideController: {fileID: 22100000, guid: e311f036d6bf550494bcdcf93df5ed2e, type: 2}
+  femaleOverrideController: {fileID: 22100000, guid: 7bc7a3b8781c503794ac3abb26069489, type: 2}
