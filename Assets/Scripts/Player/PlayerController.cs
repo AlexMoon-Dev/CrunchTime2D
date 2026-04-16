@@ -234,7 +234,8 @@ public class PlayerController : MonoBehaviour
         if      (_moveInput.x >  0.1f) FacingDir =  1;
         else if (_moveInput.x < -0.1f) FacingDir = -1;
 
-        if (_sr != null) _sr.flipX = FacingDir < 0;
+        if (_animator != null)
+            _animator.SetFloat("FacingLeft", FacingDir < 0 ? 1f : 0f);
     }
 
     // ── Input callbacks (wired by PlayerInput component) ─────────────────────

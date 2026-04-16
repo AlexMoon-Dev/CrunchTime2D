@@ -222,6 +222,183 @@ public static class AnimationSetup
         Debug.Log("[CrunchTime] Female player clips + override controller ready.");
     }
 
+    // ── Class Animations (directional L/R variants) ──────────────────────────
+
+    private readonly struct ClassDef
+    {
+        public readonly string Gender, Cls, WalkPrefix, IdlePrefix, AtkPrefix;
+        public readonly int WalkCount;
+        public ClassDef(string g, string c, string w, string id, string atk, int wc)
+        { Gender = g; Cls = c; WalkPrefix = w; IdlePrefix = id; AtkPrefix = atk; WalkCount = wc; }
+    }
+
+    private const string WalkSprDir   = "Assets/ART/WalkSpritesNew";
+    private const string AtkSprDir    = "Assets/ART/AttackSpritesNew";
+    private const string IdleSprDir   = "Assets/ART/Idle&JumpSpritesNew";
+    private const string ClassAnimDir = "Assets/Animations/Player/Classes";
+    private const string BaseAnimDir  = "Assets/Animations/Player";
+
+    private static readonly ClassDef[] AllClasses =
+    {
+        new ClassDef("Male",   "Tank",    "ManTank",    "ManTank",    "ManTank",   3),
+        new ClassDef("Male",   "Fighter", "BladeMan",   "ManSword",   "ManSword",  6),
+        new ClassDef("Male",   "Archer",  "ManRange",   "ManRange",   "ManRange",  2),
+        new ClassDef("Female", "Tank",    "WomanTank",  "WomanTank",  "WomanTank", 3),
+        new ClassDef("Female", "Fighter", "WomanBlade", "WomanBlade", "WomanSword",6),
+        new ClassDef("Female", "Archer",  "WomanRange", "WomanRange", "WomanRange",2),
+    };
+
+    [MenuItem("CrunchTime/Setup Class Animations")]
+    public static void SetupClassAnimations()
+    {
+        EnsureFolder(ClassAnimDir);
+        EnsureBaseLClips();
+        UpdateControllerForDirections();
+        foreach (var c in AllClasses) SetupClass(c);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[CrunchTime] Class animations with directional support ready.");
+    }
+
+    /// <summary>Create empty placeholder _L base clips so blend trees have assets to reference.</summary>
+    static void EnsureBaseLClips()
+    {
+        foreach (var n in new[] { "Player_Idle_L", "Player_Run_L", "Player_Attack_L", "Player_Jump_L", "Player_Fall_L" })
+        {
+            string p = $"{BaseAnimDir}/{n}.anim";
+            if (AssetDatabase.LoadAssetAtPath<AnimationClip>(p) != null) continue;
+            var clip = new AnimationClip { name = n };
+            AnimationUtility.SetAnimationClipSettings(clip, AnimationUtility.GetAnimationClipSettings(clip));
+            AssetDatabase.CreateAsset(clip, p);
+        }
+    }
+
+    /// <summary>Adds FacingLeft float and wraps each directional state in a 1D blend tree.</summary>
+    static void UpdateControllerForDirections()
+    {
+        const string ctrlPath = "Assets/Animations/Player/PlayerAnimator.controller";
+        var ctrl = AssetDatabase.LoadAssetAtPath<AnimatorController>(ctrlPath);
+        if (ctrl == null) { Debug.LogError("[CrunchTime] PlayerAnimator.controller not found."); return; }
+
+        if (ctrl.parameters.All(p => p.name != "FacingLeft"))
+            ctrl.AddParameter("FacingLeft", AnimatorControllerParameterType.Float);
+
+        AnimationClip LoadBase(string n) => AssetDatabase.LoadAssetAtPath<AnimationClip>($"{BaseAnimDir}/{n}.anim");
+
+        var rMap = new Dictionary<string, AnimationClip>
+        {
+            ["Idle"]   = LoadBase("Player_Idle"),
+            ["Run"]    = LoadBase("Player_Run"),
+            ["Jump"]   = LoadBase("Player_Jump"),
+            ["Fall"]   = LoadBase("Player_Fall"),
+            ["Attack"] = LoadBase("Player_Attack"),
+        };
+        var lMap = new Dictionary<string, AnimationClip>
+        {
+            ["Idle"]   = LoadBase("Player_Idle_L"),
+            ["Run"]    = LoadBase("Player_Run_L"),
+            ["Jump"]   = LoadBase("Player_Jump_L"),
+            ["Fall"]   = LoadBase("Player_Fall_L"),
+            ["Attack"] = LoadBase("Player_Attack_L"),
+        };
+
+        var sm = ctrl.layers[0].stateMachine;
+        foreach (var cs in sm.states)
+        {
+            if (!rMap.ContainsKey(cs.state.name)) continue;
+
+            if (cs.state.motion is BlendTree old) Object.DestroyImmediate(old, true);
+
+            var bt = new BlendTree
+            {
+                hideFlags             = HideFlags.HideInHierarchy,
+                name                  = $"{cs.state.name}_Dir",
+                blendType             = BlendTreeType.Simple1D,
+                blendParameter        = "FacingLeft",
+                useAutomaticThresholds = false
+            };
+            AssetDatabase.AddObjectToAsset(bt, ctrl);
+            bt.AddChild(rMap[cs.state.name], 0f);
+            bt.AddChild(lMap[cs.state.name], 1f);
+
+            cs.state.motion = bt;
+            EditorUtility.SetDirty(cs.state);
+        }
+
+        EditorUtility.SetDirty(ctrl);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[CrunchTime] PlayerAnimator updated with directional blend trees.");
+    }
+
+    static void SetupClass(ClassDef c)
+    {
+        string pfx = $"Player_{c.Gender}_{c.Cls}";
+
+        var idleR = GetSprite($"{IdleSprDir}/{c.IdlePrefix}Idle.png");
+        var idleL = GetSprite($"{IdleSprDir}/{c.IdlePrefix}Idle_L.png");
+        var atkR  = GetSprite($"{AtkSprDir}/{c.AtkPrefix}Attack.png");
+        var atkL  = GetSprite($"{AtkSprDir}/{c.AtkPrefix}Attack_L.png");
+
+        var walkR = Enumerable.Range(1, c.WalkCount)
+            .Select(i => GetSprite($"{WalkSprDir}/{c.WalkPrefix}Walk{i}.png"))
+            .Where(s => s != null).ToArray();
+        var walkL = Enumerable.Range(1, c.WalkCount)
+            .Select(i => GetSprite($"{WalkSprDir}/{c.WalkPrefix}Walk{i}_L.png"))
+            .Where(s => s != null).ToArray();
+
+        Sprite[] One(Sprite s) => s != null ? new[] { s } : null;
+
+        // Idle sprite is reused for Jump and Fall (per spec)
+        var idleRClip = SaveClip(MakeClip($"{pfx}_Idle",   One(idleR), 8f),        $"{ClassAnimDir}/{pfx}_Idle.anim");
+        var idleLClip = SaveClip(MakeClip($"{pfx}_Idle_L", One(idleL), 8f),        $"{ClassAnimDir}/{pfx}_Idle_L.anim");
+        var jumpRClip = SaveClip(MakeClip($"{pfx}_Jump",   One(idleR), 8f, false), $"{ClassAnimDir}/{pfx}_Jump.anim");
+        var jumpLClip = SaveClip(MakeClip($"{pfx}_Jump_L", One(idleL), 8f, false), $"{ClassAnimDir}/{pfx}_Jump_L.anim");
+        var fallRClip = SaveClip(MakeClip($"{pfx}_Fall",   One(idleR), 8f, false), $"{ClassAnimDir}/{pfx}_Fall.anim");
+        var fallLClip = SaveClip(MakeClip($"{pfx}_Fall_L", One(idleL), 8f, false), $"{ClassAnimDir}/{pfx}_Fall_L.anim");
+        // Attack: single frame
+        var atkRClip  = SaveClip(MakeClip($"{pfx}_Atk",   One(atkR), 12f, false),  $"{ClassAnimDir}/{pfx}_Atk.anim");
+        var atkLClip  = SaveClip(MakeClip($"{pfx}_Atk_L", One(atkL), 12f, false),  $"{ClassAnimDir}/{pfx}_Atk_L.anim");
+        // Walk: multi-frame, looping
+        var walkRClip = SaveClip(MakeClip($"{pfx}_Walk",   walkR.Length > 0 ? walkR : null, 10f), $"{ClassAnimDir}/{pfx}_Walk.anim");
+        var walkLClip = SaveClip(MakeClip($"{pfx}_Walk_L", walkL.Length > 0 ? walkL : null, 10f), $"{ClassAnimDir}/{pfx}_Walk_L.anim");
+
+        // Override controller
+        string ocPath    = $"{ClassAnimDir}/PlayerAnimator_{c.Gender}_{c.Cls}.overrideController";
+        var    baseCtrl  = AssetDatabase.LoadAssetAtPath<AnimatorController>("Assets/Animations/Player/PlayerAnimator.controller");
+        if (baseCtrl == null) { Debug.LogError($"[CrunchTime] Base controller missing, skipping {pfx}."); return; }
+
+        var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(ocPath);
+        if (oc == null)
+        {
+            oc = new AnimatorOverrideController(baseCtrl);
+            AssetDatabase.CreateAsset(oc, ocPath);
+            oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(ocPath);
+        }
+        else { oc.runtimeAnimatorController = baseCtrl; }
+
+        var clipMap = new Dictionary<string, AnimationClip>
+        {
+            ["Player_Idle"]     = idleRClip,  ["Player_Idle_L"]   = idleLClip,
+            ["Player_Jump"]     = jumpRClip,  ["Player_Jump_L"]   = jumpLClip,
+            ["Player_Fall"]     = fallRClip,  ["Player_Fall_L"]   = fallLClip,
+            ["Player_Attack"]   = atkRClip,   ["Player_Attack_L"] = atkLClip,
+            ["Player_Run"]      = walkRClip,  ["Player_Run_L"]    = walkLClip,
+        };
+
+        var pairs = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+        oc.GetOverrides(pairs);
+        for (int i = 0; i < pairs.Count; i++)
+        {
+            var key = pairs[i].Key;
+            if (key != null && clipMap.TryGetValue(key.name, out var rep))
+                pairs[i] = new KeyValuePair<AnimationClip, AnimationClip>(key, rep);
+        }
+        oc.ApplyOverrides(pairs);
+        EditorUtility.SetDirty(oc);
+
+        Debug.Log($"[CrunchTime] {pfx} set up.");
+    }
+
     // ── Enemy Alien (Runner) ──────────────────────────────────────────────────
 
     static void SetupAlien()
