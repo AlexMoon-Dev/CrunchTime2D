@@ -52,6 +52,7 @@ public class ShooterEnemy : EnemyBase
     private void FireAt(Vector3 targetPos)
     {
         AnimTrigger("ShootTrigger");
+        AudioManager.Instance?.PlayEnemyShooter();
         if (projectilePrefab == null) return;
         var go  = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
         var rb  = go.GetComponent<Rigidbody2D>();

@@ -31,9 +31,9 @@ public class VolumeSettings : MonoBehaviour
         MusicVolume  = PlayerPrefs.GetFloat(KEY_MUSIC,  1f);
     }
 
-    public void SetMaster(float v) { MasterVolume = v; Save(KEY_MASTER, "MasterVolume", v); }
+    public void SetMaster(float v) { MasterVolume = v; Save(KEY_MASTER, "MasterVolume", v); AudioManager.Instance?.ApplyVolumes(); }
     public void SetSFX(float v)    { SFXVolume    = v; Save(KEY_SFX,    "SFXVolume",    v); }
-    public void SetMusic(float v)  { MusicVolume  = v; Save(KEY_MUSIC,  "MusicVolume",  v); }
+    public void SetMusic(float v)  { MusicVolume  = v; Save(KEY_MUSIC,  "MusicVolume",  v); AudioManager.Instance?.ApplyVolumes(); }
 
     void Save(string prefKey, string mixerParam, float linear)
     {

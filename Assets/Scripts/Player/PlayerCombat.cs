@@ -110,6 +110,7 @@ public class PlayerCombat : MonoBehaviour
         float cooldown = 1f / _stats.attackSpeed;
         _attackCooldown = cooldown;
         _ctrl.TriggerAttackAnim();
+        AudioManager.Instance?.PlayPlayerAttack(_stats.EquippedClass);
         GetComponent<PlayerVisualFeedback>()?.OnAttack(cooldown);
 
         switch (_stats.EquippedClass)
@@ -126,6 +127,7 @@ public class PlayerCombat : MonoBehaviour
         float cooldown = (1f / _stats.attackSpeed) * 1.8f;
         _attackCooldown = cooldown;
         _ctrl.TriggerAttackAnim();
+        AudioManager.Instance?.PlayPlayerAttack(_stats.EquippedClass);
         GetComponent<PlayerVisualFeedback>()?.OnAttack(cooldown);
 
         switch (_stats.EquippedClass)
