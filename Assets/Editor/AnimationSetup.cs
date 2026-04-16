@@ -247,7 +247,8 @@ public static class AnimationSetup
         AddSpeedTransitions(idle, run);
         AnyTo(sm, die, "DieTrigger");
 
-        WirePrefab("Assets/Prefabs/Enemies/Runner.prefab", ctrl, new Vector2(0.7f, 0.85f));
+        WirePrefab("Assets/Prefabs/Enemies/Runner.prefab", ctrl, new Vector2(0.7f, 0.85f), default,
+            new Vector3(1.55f, 1.55f, 1f));   // same visual size as player
         Debug.Log("[CrunchTime] Alien set up.");
     }
 
@@ -281,7 +282,8 @@ public static class AnimationSetup
         ExitTo(shoot, idle);
         ExitTo(hurt,  idle);
 
-        WirePrefab("Assets/Prefabs/Enemies/Shooter.prefab", ctrl, new Vector2(0.45f, 0.55f));
+        WirePrefab("Assets/Prefabs/Enemies/Shooter.prefab", ctrl, new Vector2(0.45f, 0.55f), default,
+            new Vector3(2.4f, 2.4f, 1f));     // slightly smaller than player
         Debug.Log("[CrunchTime] Drone set up.");
     }
 
@@ -314,7 +316,8 @@ public static class AnimationSetup
         AnyTo(sm, die,  "DieTrigger");
         ExitTo(slam, walk);
 
-        WirePrefab("Assets/Prefabs/Enemies/Boss.prefab", ctrl, new Vector2(0.85f, 1.6f));
+        WirePrefab("Assets/Prefabs/Enemies/Boss.prefab", ctrl, new Vector2(0.85f, 1.6f), default,
+            new Vector3(1.5f, 1.5f, 1f));     // bigger boss
         Debug.Log("[CrunchTime] Hydra set up.");
     }
 
@@ -348,7 +351,8 @@ public static class AnimationSetup
         ExitTo(summon, idle);
         ExitTo(hurt,   idle);
 
-        WirePrefab("Assets/Prefabs/Enemies/Invoker.prefab", ctrl, new Vector2(0.55f, 1.15f));
+        WirePrefab("Assets/Prefabs/Enemies/Invoker.prefab", ctrl, new Vector2(0.55f, 1.15f), default,
+            new Vector3(1.4f, 1.4f, 1f));     // similar size to player
         Debug.Log("[CrunchTime] Mage set up.");
     }
 
@@ -385,7 +389,8 @@ public static class AnimationSetup
         ExitTo(attack, walk);
         ExitTo(hurt,   idle);
 
-        WirePrefab("Assets/Prefabs/Enemies/Brute.prefab", ctrl, new Vector2(0.75f, 1.15f));
+        WirePrefab("Assets/Prefabs/Enemies/Brute.prefab", ctrl, new Vector2(0.75f, 1.15f), default,
+            new Vector3(1.55f, 1.55f, 1f));   // slightly bigger than player
         Debug.Log("[CrunchTime] Mech set up.");
     }
 
@@ -419,10 +424,11 @@ public static class AnimationSetup
     /// <summary>
     /// Opens the enemy prefab, adds an Animator if missing, assigns the controller,
     /// switches SpriteRenderer to Simple draw mode, resets the tint to white,
-    /// resets the transform scale to (1,1,1), and sets the BoxCollider2D size.
+    /// sets the transform scale (use Vector3.one to keep default), and sets the BoxCollider2D size.
     /// </summary>
     static void WirePrefab(string prefabPath, RuntimeAnimatorController ctrl,
-        Vector2 colliderSize = default, Vector2 colliderOffset = default)
+        Vector2 colliderSize = default, Vector2 colliderOffset = default,
+        Vector3 scale = default)
     {
         using var scope = new PrefabUtility.EditPrefabContentsScope(prefabPath);
         var root = scope.prefabContentsRoot;
@@ -440,8 +446,8 @@ public static class AnimationSetup
             sr.color    = Color.white;
         }
 
-        // Transform — ensure no stale placeholder scale survives
-        root.transform.localScale = Vector3.one;
+        // Transform — apply per-enemy scale for visual size normalization
+        root.transform.localScale = scale == default ? Vector3.one : scale;
 
         // BoxCollider2D — set a sensible size that fits the sprite
         if (colliderSize != default)
